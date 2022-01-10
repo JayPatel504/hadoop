@@ -1,0 +1,176 @@
+<workflow-app xmlns="uri:oozie:workflow:0.2" name="Fin Proj">
+    <start to="airSchedule"/>
+    <action name="airSchedule">
+        <map-reduce>
+            <job-tracker>${jobTracker}</job-tracker>
+            <name-node>${nameNode}</name-node>
+            <prepare>
+                <delete path="${nameNode}/${outputDir}"/>
+            </prepare>
+            <configuration>
+                <property>
+                    <name>mapred.mapper.new-api</name>
+                    <value>true</value>
+                </property>
+                    <property>
+                        <name>mapred.reducer.new-api</name>
+                        <value>true</value>
+                </property>
+                <property>
+                    <name>mapred.job.queue.name</name>
+                    <value>${queueName}</value>
+                </property>
+                <property>
+                    <name>mapreduce.map.class</name>
+                    <value>airSchedule.Map</value>
+                </property>
+                <property>
+                    <name>mapreduce.combine.class</name>
+                    <value>airSchedule.Combiner</value>
+                </property>
+                <property>
+                    <name>mapreduce.reducer.class</name>
+                    <value>airSchedule.Reduce</value>
+                </property>
+		<property>
+		   <name>mapred.output.key.class</name>
+                   <value>org.apache.hadoop.io.Text</value>
+		</property>
+		<property>
+		    <name>mapred.output.value.class</name>
+                    <value>org.apache.hadoop.io.DoubleWritable</value>
+		</property>
+                <property>
+                    <name>mapred.map.tasks</name>
+                    <value>1</value>
+                </property>
+                <property>
+                    <name>mapred.input.dir</name>
+                    <value>/home/ubuntu/input</value>
+                </property>
+                <property>
+                    <name>mapred.output.dir</name>
+                    <value>/${outputDir}</value>
+                </property>
+            </configuration>
+        </map-reduce>
+        <ok to="taxi"/>
+        <error to="fail"/>
+    </action>
+
+    <action name="taxi">
+        <map-reduce>
+            <job-tracker>${jobTracker}</job-tracker>
+            <name-node>${nameNode}</name-node>
+            <prepare>
+                <delete path="${nameNode}/${outputDir}"/>
+            </prepare>
+            <configuration>
+	    	<property>
+	    	      <name>mapred.mapper.new-api</name>
+	              <value>true</value>
+           	</property>
+            	<property>
+            	     <name>mapred.reducer.new-api</name>
+            	     <value>true</value>
+           	</property>
+                <property>
+                    <name>mapred.job.queue.name</name>
+                    <value>${queueName}</value>
+                </property>
+                <property>
+                    <name>mapreduce.map.class</name>
+                    <value>taxi.tMap</value>
+                </property>
+                <property>
+                    <name>mapreduce.combine.class</name>
+                    <value>taxi.tCombiner</value>
+                </property>
+                <property>
+                    <name>mapreduce.reducer.class</name>
+                    <value>taxi.tReduce</value>
+                </property>
+			<property>
+		   <name>mapred.output.key.class</name>
+                   <value>org.apache.hadoop.io.Text</value>
+			</property>
+			<property>
+		    <name>mapred.output.value.class</name>
+                    <value>org.apache.hadoop.io.DoubleWritable</value>
+			</property>
+                <property>
+                    <name>mapred.map.tasks</name>
+                    <value>1</value>
+                </property>
+                <property>
+                    <name>mapred.input.dir</name>
+                    <value>/home/ubuntu/Project</value>
+                </property>
+                <property>
+                    <name>mapred.output.dir</name>
+                    <value>/${outputDir}</value>
+                </property>
+            </configuration>
+        </map-reduce>
+        <ok to="cancel"/>
+        <error to="fail"/>
+    </action>
+
+	<action name="cancel">
+        <map-reduce>
+            <job-tracker>${jobTracker}</job-tracker>
+            <name-node>${nameNode}</name-node>
+            <prepare>
+                <delete path="${nameNode}/${outputDir}"/>
+            </prepare>
+            <configuration>
+	    	<property>
+	    	      <name>mapred.mapper.new-api</name>
+	              <value>true</value>
+           	</property>
+            	<property>
+            	     <name>mapred.reducer.new-api</name>
+            	     <value>true</value>
+           	</property>
+                <property>
+                    <name>mapred.job.queue.name</name>
+                    <value>${queueName}</value>
+                </property>
+                <property>
+                    <name>mapreduce.map.class</name>
+                    <value>caancel.CanMapper</value>
+                </property>
+                <property>
+                    <name>mapreduce.reducer.class</name>
+                    <value>cancel.CanReducer</value>
+                </property>
+		<property>
+		   <name>mapred.output.key.class</name>
+                   <value>org.apache.hadoop.io.Text</value>
+		</property>
+		<property>
+		    <name>mapred.output.value.class</name>
+                    <value>org.apache.hadoop.io.LongWritable</value>
+		</property>
+                <property>
+                    <name>mapred.map.tasks</name>
+                    <value>1</value>
+                </property>
+                <property>
+                    <name>mapred.input.dir</name>
+                    <value>/home/ubuntu/Project</value>
+                </property>
+                <property>
+                    <name>mapred.output.dir</name>
+                    <value>/${outputDir}</value>
+                </property>
+            </configuration>
+        </map-reduce>
+        <ok to="end"/>
+        <error to="fail"/>
+    </action>
+	<kill name="fail">
+        <message>Map/Reduce failed, error message[${wf:errorMessage(wf:lastErrorNode())}]</message>
+    </kill>
+    <end name="end"/>
+</workflow-app>
